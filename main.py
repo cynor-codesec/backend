@@ -8,9 +8,12 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from pdf2image import convert_from_path
-from sessions import init_session, get_session_status
+from sessions import *
 from models import RequireID
-import PIL
+from azure_functions import azure_ocr
+import constants
+from jd_functions import ocr_and_update
+import rqueue
 
 from file_manager import save_file
 
@@ -74,7 +77,8 @@ async def send_jd(file: UploadFile = File(...)):
             }, status_code=201)
         else:
             return JSONResponse(content={"message": "Wrong file type!"}, status_code=400)
-    return JSONResponse(content={"message": "Error adding JD"}, status_code=500)
+    return JSONResponse(content={"message": "Not implemented yet"}, status_code=501)
+
 
 @app.get("/get-status")
 async def get_status(id: str):
@@ -84,19 +88,24 @@ async def get_status(id: str):
     except:
         return JSONResponse(content={"status": "Error, Invalid id"}, status_code=500)
 
+
 @app.post("/send-selected-features")
-async def send_selected_features(item: RequireID, resp: UploadFile = File(...), req: UploadFile = File(...)):
+async def send_selected_features(id: str, resp: UploadFile = File(...), req: UploadFile = File(...)):
     if resp.filename == "" or req.filename == "":
         return JSONResponse(content={"message": "Resp/Req image missing"}, status_code=400)
     else:
         if resp.filename.endswith(".jpg") and req.filename.endswith(".jpg"):
             resp_content = await resp.read()
             req_content = await req.read()
-            resp_path = save_file("resp.jpg", resp_content, item._id, "jd")
-            req_path = save_file("req.jpg", req_content, item._id, "jd")
-            #ocr
-            
-            return JSONResponse(content={"message": "Images saved"}, status_code=201)
+            resp_path = save_file("resp.jpg", resp_content, id, "jd")
+            req_path = save_file("req.jpg", req_content, id, "jd")
+            # print(constants.PUBLIC_BASE_URL + "/" + resp_path)
+            rqueue.q.enqueue(ocr_and_update, resp_path, req_path, id)
+            return JSONResponse(content={
+                "message": "Images saved",
+                "resp_img": resp_path,
+                "req_img": req_path
+            }, status_code=201)
         else:
             return JSONResponse(content={"message": "Wrong file type!"}, status_code=400)
     return JSONResponse(content={"message": "Not implemented yet"}, status_code=501)

@@ -37,3 +37,6 @@ def update_session_req_img(id, img):
 
 def update_session_resp_img(id, img):
     sessions_collection.update_one({'_id': id}, {'$set': {'resp_img': img}})
+
+def get_session_jd_img(id):
+    return sessions_collection.find_one({'_id': id})['JD_img']
