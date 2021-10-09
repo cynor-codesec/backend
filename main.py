@@ -16,6 +16,11 @@ from jd_functions import ocr_and_update
 import rqueue
 
 from file_manager import save_file
+from pydantic import BaseModel
+
+class UpdateFS(BaseModel):
+    id: str
+    feature_store: dict
 
 def configure_static(app):
     app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -117,5 +122,13 @@ async def get_feature_store(id: str):
         if feature_store is None:
             return JSONResponse(content={"message": "Feature store not available yet"}, status_code=200)
         return JSONResponse(content={"feature_store": feature_store}, status_code=200)
+    except:
+        return JSONResponse(content={"message": "Error, Invalid id"}, status_code=500)
+
+@app.post("/send-updated-feature_store")
+async def send_updated_feature_store(item: UpdateFS):
+    try:
+        update_session_features(item.id, item.feature_store)
+        return JSONResponse(content={"message": "Feature store updated"}, status_code=200)
     except:
         return JSONResponse(content={"message": "Error, Invalid id"}, status_code=500)
