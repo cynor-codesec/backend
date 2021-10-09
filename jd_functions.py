@@ -1,16 +1,17 @@
 from azure_functions import azure_ocr
 import constants
 from sessions import get_session_jd_img, update_session_ocr, update_session_features, update_session_status
+import rqueue
 import spacy
 from spacy.matcher import Matcher
 from spacy.matcher import PhraseMatcher
 from spacy.tokens import Span
-from models import location_and_company_name_model, designation_model, requirements_model
+import models
 
 
 # jdDataOcr ->  dictionary
 def get_location_and_company_name(texts):
-    nlp = location_and_company_name_model
+    nlp = spacy.load('en_core_web_lg')
     docs = nlp.pipe(texts)
 
     info_dict = {
@@ -67,7 +68,7 @@ def get_designation(texts):
             "weight": 0,
         },
     }
-    nlp = designation_model
+    nlp = spacy.load('en_core_web_sm')
     matcher = PhraseMatcher(nlp.vocab, attr="LOWER")
 
     with open('data/job-titles.txt') as f:
@@ -95,7 +96,7 @@ def get_designation(texts):
 
 
 def get_requirements(texts):
-    nlp = requirements_model
+    nlp = spacy.load('en_core_web_sm')
     matcher = Matcher(nlp.vocab)
 
     # keyword extraction

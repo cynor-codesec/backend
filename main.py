@@ -11,7 +11,7 @@ from pdf2image import convert_from_path
 from sessions import *
 from azure_functions import azure_ocr
 import constants
-import models
+# import models
 from jd_functions import ocr_and_update
 import rqueue
 
