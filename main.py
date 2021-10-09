@@ -85,15 +85,17 @@ async def get_status(id: str):
         return JSONResponse(content={"status": "Error, Invalid id"}, status_code=500)
 
 @app.post("/send-selected-features")
-async def send_selected_features(item: RequireID, resp: UploadFile = File(...), reqs: UploadFile = File(...)):
-    if resp.filename == "" or reqs.filename == "":
+async def send_selected_features(item: RequireID, resp: UploadFile = File(...), req: UploadFile = File(...)):
+    if resp.filename == "" or req.filename == "":
         return JSONResponse(content={"message": "Resp/Req image missing"}, status_code=400)
     else:
-        if resp.filename.endswith(".jpg") and reqs.filename.endswith(".jpg"):
+        if resp.filename.endswith(".jpg") and req.filename.endswith(".jpg"):
             resp_content = await resp.read()
-            reqs_content = await reqs.read()
-            resp_path = save_file("resp.jpg", resp_content, item.id, "jd")
-            reqs_path = save_file("reqs.jpg", reqs_content, item.id, "jd")
+            req_content = await req.read()
+            resp_path = save_file("resp.jpg", resp_content, item._id, "jd")
+            req_path = save_file("req.jpg", req_content, item._id, "jd")
+            #ocr
+            
             return JSONResponse(content={"message": "Images saved"}, status_code=201)
         else:
             return JSONResponse(content={"message": "Wrong file type!"}, status_code=400)
