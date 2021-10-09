@@ -9,14 +9,13 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from pdf2image import convert_from_path
 from sessions import *
-from models import RequireID
 from azure_functions import azure_ocr
 import constants
+import models
 from jd_functions import ocr_and_update
 import rqueue
 
 from file_manager import save_file
-
 
 def configure_static(app):
     app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -69,6 +68,7 @@ async def send_jd(file: UploadFile = File(...)):
                 i += 1
             id_afi = init_session(u_id, file_path, jd_imgs)
             print(id_afi)
+            update_session_status(id_afi, "initiated")
             return JSONResponse(content={
                 "message": "File created!",
                 "_id": id_afi,
@@ -109,3 +109,13 @@ async def send_selected_features(id: str, resp: UploadFile = File(...), req: Upl
         else:
             return JSONResponse(content={"message": "Wrong file type!"}, status_code=400)
     return JSONResponse(content={"message": "Not implemented yet"}, status_code=501)
+
+@app.get("/get-feature-store")
+async def get_feature_store(id: str):
+    try:
+        feature_store = get_session_feature_store(id)
+        if feature_store is None:
+            return JSONResponse(content={"message": "Feature store not available yet"}, status_code=200)
+        return JSONResponse(content={"feature_store": feature_store}, status_code=200)
+    except:
+        return JSONResponse(content={"message": "Error, Invalid id"}, status_code=500)

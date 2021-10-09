@@ -40,3 +40,6 @@ def update_session_resp_img(id, img):
 
 def get_session_jd_img(id):
     return sessions_collection.find_one({'_id': id})['JD_img']
+
+def get_session_feature_store(id):
+    return sessions_collection.find_one({'_id': id})['features_store']
