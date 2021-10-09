@@ -9,6 +9,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from pdf2image import convert_from_path
 from sessions import init_session, get_session_status
+from models import RequireID
 import PIL
 
 from file_manager import save_file
@@ -82,3 +83,18 @@ async def get_status(id: str):
         return JSONResponse(content={"status": status}, status_code=200)
     except:
         return JSONResponse(content={"status": "Error, Invalid id"}, status_code=500)
+
+@app.post("/send-selected-features")
+async def send_selected_features(item: RequireID, resp: UploadFile = File(...), reqs: UploadFile = File(...)):
+    if resp.filename == "" or reqs.filename == "":
+        return JSONResponse(content={"message": "Resp/Req image missing"}, status_code=400)
+    else:
+        if resp.filename.endswith(".jpg") and reqs.filename.endswith(".jpg"):
+            resp_content = await resp.read()
+            reqs_content = await reqs.read()
+            resp_path = save_file("resp.jpg", resp_content, item.id, "jd")
+            reqs_path = save_file("reqs.jpg", reqs_content, item.id, "jd")
+            return JSONResponse(content={"message": "Images saved"}, status_code=201)
+        else:
+            return JSONResponse(content={"message": "Wrong file type!"}, status_code=400)
+    return JSONResponse(content={"message": "Not implemented yet"}, status_code=501)
