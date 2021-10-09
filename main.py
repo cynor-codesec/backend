@@ -10,6 +10,7 @@ from pydantic import BaseModel
 from pdf2image import convert_from_path
 from sessions import *
 from azure_functions import azure_ocr
+from docx2pdf import convert
 import constants
 # import models
 from jd_functions import ocr_and_update
@@ -62,7 +63,9 @@ async def send_jd(file: UploadFile = File(...)):
                 file_name = "jd.docx"
             content = await file.read()
             file_path = save_file(file_name, content, u_id, "jd")
-            images = convert_from_path(file_path)
+            if file_path.endswith(".docx"):
+                convert(file_path, file_path.replace(".docx", ".pdf"))
+            images = convert_from_path(file_path.replace(".docx", ".pdf"))
             jd_imgs = []
             i = 1
             for image in images:
@@ -99,12 +102,11 @@ async def send_selected_features(id: str, resp: UploadFile = File(...), req: Upl
     if resp.filename == "" or req.filename == "":
         return JSONResponse(content={"message": "Resp/Req image missing"}, status_code=400)
     else:
-        if resp.filename.endswith(".jpg") and req.filename.endswith(".jpg"):
+        if resp.filename.endswith(".png") and req.filename.endswith(".png"):
             resp_content = await resp.read()
             req_content = await req.read()
-            resp_path = save_file("resp.jpg", resp_content, id, "jd")
-            req_path = save_file("req.jpg", req_content, id, "jd")
-            # print(constants.PUBLIC_BASE_URL + "/" + resp_path)
+            resp_path = save_file("resp.png", resp_content, id, "jd")
+            req_path = save_file("req.png", req_content, id, "jd")
             rqueue.q.enqueue(ocr_and_update, resp_path, req_path, id)
             return JSONResponse(content={
                 "message": "Images saved",
