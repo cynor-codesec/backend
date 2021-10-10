@@ -20,7 +20,7 @@ import rqueue
 
 from file_manager import save_file, save_cvs_zip
 from pydantic import BaseModel
-
+import add_to_store
 
 class UpdateFS(BaseModel):
     id: str
@@ -148,20 +148,27 @@ async def send_cvs(id: str, file: UploadFile = File(...)):
         return JSONResponse(content={"message": "No file sent!"}, status_code=400)
     else:
         insterted_cvs = []
+        cv_ids = []
+        cv_paths = []
         if file.filename.endswith(".zip"):
             content = await file.read()
             file_path = save_cvs_zip(content, id)
             archive = zipfile.ZipFile(file_path, 'r')
-            print(archive.namelist())
+            # print(archive.namelist())
             files_in_zip = archive.namelist()
             for fil in files_in_zip:
-                if fil.endswith(".pdf"):
+                if fil.endswith(".pdf") and not fil.startswith("__MACOSX"):
+                    print(fil)
                     u_id = str(uuid.uuid4().hex)
                     data = archive.read(fil)
                     fp = save_file(u_id + ".pdf", data, id, "cv")
                     ins_cv = init_cv(u_id, id, fp)
                     insterted_cvs.append({"cv_id": ins_cv, "file": fp})
+                    cv_ids.append(ins_cv)
+                    cv_paths.append(fp) 
+            archive.close()
             if len(insterted_cvs) > 0:
+                rqueue.q.enqueue(add_to_store.add_to_store, cv_ids, cv_paths, id)
                 return JSONResponse(content={"message": "Files saved", "cvs": insterted_cvs}, status_code=201)
             else:
                 return JSONResponse(content={"message": "No files saved, zip had no pdf files!"}, status_code=400)

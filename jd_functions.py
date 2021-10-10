@@ -21,7 +21,7 @@ def get_location_and_company_name(texts):
             "end": None,
             "line_ix": None,
             "line": None,
-            "weight": 0,
+            "weight": 1,
         },
         "location": {
             "text": None,
@@ -29,7 +29,7 @@ def get_location_and_company_name(texts):
             "end": None,
             "line_ix": None,
             "line": None,
-            "weight": 0,
+            "weight": 1,
         }
     }
 
@@ -65,7 +65,7 @@ def get_designation(texts):
             "end": None,
             "line_ix": None,
             "line": None,
-            "weight": 0,
+            "weight": 1,
         },
     }
     nlp = spacy.load('en_core_web_sm')
@@ -154,7 +154,7 @@ def get_requirements(texts):
         info_dict["skill" + str(ix)] = {}
         info_dict["skill" + str(ix)]["line_ix"] = ix
         info_dict["skill" + str(ix)]["line"] = doc.text
-        info_dict["skill" + str(ix)]["weight"] = 0
+        info_dict["skill" + str(ix)]["weight"] = 1
         matches = matcher(doc)
         spans = []
         for match_id, start, end in matches:
@@ -182,7 +182,7 @@ def get_responsibilities(texts):
         info_dict["repsonsibility"+str(ix)]["line"] = text
         info_dict["repsonsibility"+str(ix)]["text"] = text
         info_dict["repsonsibility"+str(ix)]["line_ix"] = ix
-        info_dict["repsonsibility"+str(ix)]["weight"] = 0
+        info_dict["repsonsibility"+str(ix)]["weight"] = 1
     return info_dict
 
 

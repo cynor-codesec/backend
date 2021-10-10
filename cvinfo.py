@@ -20,3 +20,6 @@ def init_cv(id, jd_id, path):
         "skill_verify": {}
     })
     return ins.inserted_id
+
+def update_cv_feature_store(id, feature_store):
+    cv_collection.update_one({"_id": id}, {"$set": {"cv_feature_store": feature_store}})
