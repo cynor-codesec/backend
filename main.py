@@ -9,6 +9,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from pdf2image import convert_from_path
 from sessions import *
+from cvinfo import *
 from azure_functions import azure_ocr
 from docx2pdf import convert
 import zipfile
@@ -146,11 +147,24 @@ async def send_cvs(id: str, file: UploadFile = File(...)):
     if file.filename == "":
         return JSONResponse(content={"message": "No file sent!"}, status_code=400)
     else:
+        insterted_cvs = []
         if file.filename.endswith(".zip"):
             content = await file.read()
             file_path = save_cvs_zip(content, id)
             archive = zipfile.ZipFile(file_path, 'r')
             print(archive.namelist())
+            files_in_zip = archive.namelist()
+            for fil in files_in_zip:
+                if fil.endswith(".pdf"):
+                    u_id = str(uuid.uuid4().hex)
+                    data = archive.read(fil)
+                    fp = save_file(u_id + ".pdf", data, id, "cv")
+                    ins_cv = init_cv(u_id, id, fp)
+                    insterted_cvs.append({"cv_id": ins_cv, "file": fp})
+            if len(insterted_cvs) > 0:
+                return JSONResponse(content={"message": "Files saved", "cvs": insterted_cvs}, status_code=201)
+            else:
+                return JSONResponse(content={"message": "No files saved, zip had no pdf files!"}, status_code=400)
         else:
             return JSONResponse(content={"message": "Wrong file type!"}, status_code=400)
     return JSONResponse(content={"message": "Not implemented yet"}, status_code=501)
