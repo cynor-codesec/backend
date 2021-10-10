@@ -20,3 +20,15 @@ def save_file(name, file_data, uid, type):
     with open(file_name, "wb") as f:
         f.write(file_data)
     return file_name
+
+def save_cvs_zip(content, id):
+    filename = "static/cv/zip/" + id + "/" + "cvs.zip"
+    if not os.path.exists(os.path.dirname(filename)):
+        try:
+            os.makedirs(os.path.dirname(filename))
+        except OSError as exc: # Guard against race condition
+            if exc.errno != errno.EEXIST:
+                raise
+    with open("static/cv/zip/" + id + "/" + "cvs.zip", "wb") as f:
+        f.write(content)
+    return filename

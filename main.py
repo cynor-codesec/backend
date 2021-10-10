@@ -11,17 +11,20 @@ from pdf2image import convert_from_path
 from sessions import *
 from azure_functions import azure_ocr
 from docx2pdf import convert
+import zipfile
 import constants
 # import models
 from jd_functions import ocr_and_update
 import rqueue
 
-from file_manager import save_file
+from file_manager import save_file, save_cvs_zip
 from pydantic import BaseModel
+
 
 class UpdateFS(BaseModel):
     id: str
     feature_store: dict
+
 
 def configure_static(app):
     app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -117,6 +120,7 @@ async def send_selected_features(id: str, resp: UploadFile = File(...), req: Upl
             return JSONResponse(content={"message": "Wrong file type!"}, status_code=400)
     return JSONResponse(content={"message": "Not implemented yet"}, status_code=501)
 
+
 @app.get("/get-feature-store")
 async def get_feature_store(id: str):
     try:
@@ -127,6 +131,7 @@ async def get_feature_store(id: str):
     except:
         return JSONResponse(content={"message": "Error, Invalid id"}, status_code=500)
 
+
 @app.post("/send-updated-feature_store")
 async def send_updated_feature_store(item: UpdateFS):
     try:
@@ -134,3 +139,18 @@ async def send_updated_feature_store(item: UpdateFS):
         return JSONResponse(content={"message": "Feature store updated"}, status_code=200)
     except:
         return JSONResponse(content={"message": "Error, Invalid id"}, status_code=500)
+
+
+@app.post("/send-cvs")
+async def send_cvs(id: str, file: UploadFile = File(...)):
+    if file.filename == "":
+        return JSONResponse(content={"message": "No file sent!"}, status_code=400)
+    else:
+        if file.filename.endswith(".zip"):
+            content = await file.read()
+            file_path = save_cvs_zip(content, id)
+            archive = zipfile.ZipFile(file_path, 'r')
+            print(archive.namelist())
+        else:
+            return JSONResponse(content={"message": "Wrong file type!"}, status_code=400)
+    return JSONResponse(content={"message": "Not implemented yet"}, status_code=501)
