@@ -239,3 +239,10 @@ async def get_stats(id: str):
     },
         status_code=200
     )
+
+@app.get("/get-cv")
+async def get_cv(id: str):
+    cv = get_cv_by_id(id)
+    return JSONResponse(content=cv, status_code=200)
+
+# @app.get("/get-csv")

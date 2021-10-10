@@ -65,3 +65,6 @@ def get_list_of_total_scores(jd_id):
     for cv in cv_list:
         total_score_list.append(cv["cv_feature_store"]["total_score"])
     return total_score_list
+
+def get_cv_by_id(id):
+    return cv_collection.find_one({"_id": id})
