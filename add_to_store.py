@@ -5,7 +5,7 @@ from haystack.preprocessor import PreProcessor
 from haystack.document_store import ElasticsearchDocumentStore
 from haystack.file_converter.docx import DocxToTextConverter
 import get_cv_score
-from sessions import get_session_feature_store
+from sessions import get_session_feature_store, update_session_status
 import rqueue
 
 def add_to_store(filenames, filepaths, jd_id):
@@ -52,7 +52,7 @@ def add_to_store(filenames, filepaths, jd_id):
     document_store.write_documents(docs)
     print("HERE")
     print(document_store.get_all_documents(filters={"name": [filenames[0]]}))
-
+    update_session_status(jd_id, "feature_store_created")
     feature_store = get_session_feature_store(jd_id)
     for file in filenames:
         rqueue.q.enqueue(get_cv_score.get_cv_score, feature_store, file)

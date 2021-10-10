@@ -118,6 +118,7 @@ async def send_selected_features(id: str, resp: UploadFile = File(...), req: Upl
         resp_path = save_file("resp.png", resp_content, id, "jd")
         req_path = save_file("req.png", req_content, id, "jd")
         rqueue.q.enqueue(ocr_and_update, resp_path, req_path, id)
+        update_session_status(id, "feature_selected")
         return JSONResponse(content={
             "message": "Images saved",
             "resp_img": resp_path,
@@ -143,6 +144,7 @@ async def get_feature_store(id: str):
 async def send_updated_feature_store(item: UpdateFS):
     try:
         update_session_features(item.id, item.feature_store)
+        update_session_status(item.id, "feature_store_updated")
         return JSONResponse(content={"message": "Feature store updated"}, status_code=200)
     except:
         return JSONResponse(content={"message": "Error, Invalid id"}, status_code=500)
@@ -176,6 +178,7 @@ async def send_cvs(id: str, file: UploadFile = File(...)):
                 rqueue.q.enqueue(add_to_store.add_to_store,
                                  cv_ids, cv_paths, id)
                 rqueue.q.enqueue(parse_resume, cv_paths)
+                update_session_status(id, "cvs_added")
                 return JSONResponse(content={"message": "Files saved", "cvs": insterted_cvs}, status_code=201)
             else:
                 return JSONResponse(content={"message": "No files saved, zip had no pdf files!"}, status_code=400)
@@ -240,9 +243,14 @@ async def get_stats(id: str):
         status_code=200
     )
 
+
 @app.get("/get-cv")
 async def get_cv(id: str):
     cv = get_cv_by_id(id)
     return JSONResponse(content=cv, status_code=200)
 
-# @app.get("/get-csv")
+
+@app.get("/get-csv")
+async def get_csv(id: str):
+    file = create_csv(id)
+    return JSONResponse(content={"csv": file}, status_code=200)

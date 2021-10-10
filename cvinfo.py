@@ -43,11 +43,12 @@ def parse_resume(cv_paths):
         college_name = data["college_name"]
         # update in db
         cv_collection.update_one({"_id": id}, {"$set": {"name": name, "mobile_number": mobile_number, "email": email, "degree": degree,
-                                "designation": designation, "experience": experience, "total_experience": total_experience, "college_name": college_name}})
+                                                        "designation": designation, "experience": experience, "total_experience": total_experience, "college_name": college_name}})
 
 
 def get_cvs_by_jd_id(jd_id):
     return cv_collection.find({"jd_id": jd_id})
+
 
 def get_average_score(jd_id):
     cv_list = get_cvs_by_jd_id(jd_id)
@@ -56,8 +57,10 @@ def get_average_score(jd_id):
         total_score += cv["cv_feature_store"]["total_score"]
     return total_score/cv_list.count()
 
+
 def number_of_cvs(jd_id):
     return get_cvs_by_jd_id(jd_id).count()
+
 
 def get_list_of_total_scores(jd_id):
     cv_list = get_cvs_by_jd_id(jd_id)
@@ -66,5 +69,33 @@ def get_list_of_total_scores(jd_id):
         total_score_list.append(cv["cv_feature_store"]["total_score"])
     return total_score_list
 
+
 def get_cv_by_id(id):
     return cv_collection.find_one({"_id": id})
+
+
+def clean_list(list):
+    return str(list).replace("[", "").replace("]", "").replace("'", "").replace(",", ";")
+
+
+def create_csv(jd_id):
+    cv_list = get_cvs_by_jd_id(jd_id)
+    csv_file = open("static/csv/"+jd_id+".csv", "w")
+    csv_file.write(
+        "Name,Mobile Number,Email,Degree,Designation,Experience,Total Experience,College Name,Total Score,URL\n")
+    for cv in cv_list:
+        if not cv["degree"]:
+            cv["degree"] = ["NA"]
+        if not cv["designation"]:
+            cv["designation"] = ["NA"]
+        if not cv["college_name"]:
+            cv["college_name"] = ["NA"]
+        if not cv["experience"]:
+            cv["experience"] = ["NA"]
+        if not cv["college_name"]:
+            cv["college_name"] = ["NA"]
+
+        csv_file.write(cv["name"]+","+str(cv["mobile_number"])+","+cv["email"]+","+clean_list(cv["degree"][0])+","+clean_list(cv["designation"][0])+","+clean_list(cv["experience"][0])+","+str(cv["total_experience"]) +
+                       ","+clean_list(cv["college_name"][0])+","+str(cv["cv_feature_store"]["total_score"])+ "," + str("static/cv/" + jd_id + "/" + cv["_id"] + ".pdf")+"\n")
+    csv_file.close()
+    return "static/csv/"+jd_id+".csv"
