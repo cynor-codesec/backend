@@ -4,7 +4,7 @@ import pprint
 from cvinfo import update_cv_feature_store
 
 document_store = ElasticsearchDocumentStore(
-    host="localhost", username="", password="", index="document")
+    host="157.245.110.225", username="", password="", index="document")
 ranker = SentenceTransformersRanker(
     model_name_or_path="cross-encoder/ms-marco-MiniLM-L-12-v2")
 
@@ -26,6 +26,8 @@ def get_cv_score(feature_store, id):
             for key2, req in value.items():
                 cvInfo[key][key2] = req
                 print(req)
+                if req["text"] == None:
+                    continue
                 keyword = ' '.join([kw[0] for kw in req["text"]]) #TODO
                 weight = req["weight"]
                 result = ranker.predict(query=keyword, documents=documents, top_k=1)
@@ -40,6 +42,8 @@ def get_cv_score(feature_store, id):
             for key2, req in value.items():
                 cvInfo[key][key2] = req
                 keyword = req["text"] 
+                if req["text"] == None:
+                    continue
                 weight = req["weight"]
                 result = ranker.predict(query=keyword, documents=documents, top_k=1)
                 if result[0][0].item() > 0:
@@ -50,6 +54,8 @@ def get_cv_score(feature_store, id):
                     cvInfo[key][key2].update({"sim_score": None, "matched": None, "weighted_score": 0})
         else:
             keyword = value["text"]
+            if keyword == None:
+                    continue
             weight = value["weight"]
             result = ranker.predict(
                 query=keyword, documents=documents, top_k=1)

@@ -13,7 +13,7 @@ def add_to_store(filenames, filepaths, jd_id):
     pdf_converter = PDFToTextConverter(remove_numeric_tables=True, valid_languages=["en"])
     doc_converter = DocxToTextConverter(remove_numeric_tables=True, valid_languages=["de","en"])
 
-    document_store = ElasticsearchDocumentStore(host="localhost", username="", password="", index="document")
+    document_store = ElasticsearchDocumentStore(host="157.245.110.225", username="", password="", index="document")
 
     processor = PreProcessor(clean_empty_lines=True,
                             clean_whitespace=True,
