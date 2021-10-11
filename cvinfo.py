@@ -75,7 +75,7 @@ def get_cv_by_id(id):
 
 
 def clean_list(list):
-    return str(list).replace("[", "").replace("]", "").replace("'", "").replace(",", ";")
+    return str(list).replace("[", "").replace("]", "").replace("'", "").replace(",", ";").replace("\n", "")
 
 def get_cvs_by_jd_id_sorted_by_total_score(jd_id):
     cv_list = get_cvs_by_jd_id(jd_id)
