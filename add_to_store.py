@@ -27,7 +27,7 @@ def add_to_store(filenames, filepaths, jd_id):
         # Optional: Supply any meta data here
         # the "name" field will be used by DPR if embed_title=True, rest is custom and can be named arbitrarily
         print("Adding file: " + f_name)
-        cur_meta = {"name": f_name}
+        cur_meta = {"name": f_name, "jd_id": jd_id}
 
         # Run the conversion on each file (PDF -> 1x doc)
         if f_path.endswith(".pdf"):

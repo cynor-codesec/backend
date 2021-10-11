@@ -1,3 +1,4 @@
+from haystack.document_store.elasticsearch import ElasticsearchDocumentStore
 import db
 from typing import Optional
 import uuid
@@ -24,6 +25,9 @@ import nltk
 from fastapi.responses import FileResponse
 import base64
 import statistics
+from haystack.retriever import ElasticsearchRetriever
+document_store = ElasticsearchDocumentStore(host="157.245.110.225", username="", password="", index="document")
+retriever = ElasticsearchRetriever(document_store)
 
 nltk.download('stopwords')
 
@@ -254,3 +258,9 @@ async def get_cv(id: str):
 async def get_csv(id: str):
     file = create_csv(id)
     return JSONResponse(content={"csv": file}, status_code=200)
+
+@app.get("/search")
+async def search(jd_id: str, query: str):
+    res = retriever.retrieve(query=query, filters={"jd_id": [jd_id]}, top_k=5)
+    cvs = [get_cv_by_id(r.meta["name"]) for r in res ]
+    return JSONResponse(content={"results": cvs}, status_code=200)  
