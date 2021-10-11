@@ -77,9 +77,15 @@ def get_cv_by_id(id):
 def clean_list(list):
     return str(list).replace("[", "").replace("]", "").replace("'", "").replace(",", ";")
 
+def get_cvs_by_jd_id_sorted_by_total_score(jd_id):
+    cv_list = get_cvs_by_jd_id(jd_id)
+    cv_list = list(cv_list)
+    cv_list.sort(key=lambda x: x["cv_feature_store"]["total_score"], reverse=True)
+    return cv_list
+
 
 def create_csv(jd_id):
-    cv_list = get_cvs_by_jd_id(jd_id)
+    cv_list = get_cvs_by_jd_id_sorted_by_total_score(jd_id)
     csv_file = open("static/csv/"+jd_id+".csv", "w")
     csv_file.write(
         "Name,Mobile Number,Email,Degree,Designation,Experience,Total Experience,College Name,Total Score,URL\n")
@@ -94,6 +100,15 @@ def create_csv(jd_id):
             cv["experience"] = ["NA"]
         if not cv["college_name"]:
             cv["college_name"] = ["NA"]
+        if not cv["name"]:
+            cv["name"] = "NA"
+        if not cv["mobile_number"]:
+            cv["mobile_number"] = "NA"
+        if not cv["email"]:
+            cv["email"] = "NA"
+        if not cv["total_experience"]:
+            cv["total_experience"] = "NA"
+        
 
         csv_file.write(cv["name"]+","+str(cv["mobile_number"])+","+cv["email"]+","+clean_list(cv["degree"][0])+","+clean_list(cv["designation"][0])+","+clean_list(cv["experience"][0])+","+str(cv["total_experience"]) +
                        ","+clean_list(cv["college_name"][0])+","+str(cv["cv_feature_store"]["total_score"])+ "," + str("static/cv/" + jd_id + "/" + cv["_id"] + ".pdf")+"\n")
