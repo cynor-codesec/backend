@@ -4,6 +4,7 @@ from haystack.file_converter.pdf import PDFToTextConverter
 from haystack.preprocessor import PreProcessor
 from haystack.document_store import ElasticsearchDocumentStore
 from haystack.file_converter.docx import DocxToTextConverter
+from rq.job import Retry
 import get_cv_score
 from sessions import get_session_feature_store, update_session_status
 import rqueue
@@ -55,7 +56,7 @@ def add_to_store(filenames, filepaths, jd_id):
     update_session_status(jd_id, "feature_store_created")
     feature_store = get_session_feature_store(jd_id)
     for file in filenames:
-        rqueue.q.enqueue(get_cv_score.get_cv_score, feature_store, file)
+        rqueue.q.enqueue(get_cv_score.get_cv_score, args=(feature_store, file), retry=Retry(max=3), timeout=500)
 
 # if __name__ == "__main__":
 #     add_to_store(['a', 'b', 'c', 'd'], ['cv/1.pdf', 'cv/3.pdf', 'cv/4.pdf', 'cv/5.pdf'])

@@ -1,4 +1,5 @@
 from haystack.document_store.elasticsearch import ElasticsearchDocumentStore
+from rq.job import Retry
 import db
 from typing import Optional
 import uuid
@@ -121,7 +122,7 @@ async def send_selected_features(id: str, resp: UploadFile = File(...), req: Upl
         req_content = await req.read()
         resp_path = save_file("resp.png", resp_content, id, "jd")
         req_path = save_file("req.png", req_content, id, "jd")
-        rqueue.q.enqueue(ocr_and_update, resp_path, req_path, id)
+        rqueue.q.enqueue(ocr_and_update, args=(resp_path, req_path, id), retry=Retry(max=3), timeout=500)
         update_session_status(id, "feature_selected")
         return JSONResponse(content={
             "message": "Images saved",
@@ -180,7 +181,7 @@ async def send_cvs(id: str, file: UploadFile = File(...)):
             archive.close()
             if len(insterted_cvs) > 0:
                 rqueue.q.enqueue(add_to_store.add_to_store,
-                                 cv_ids, cv_paths, id)
+                                 args=(cv_ids, cv_paths, id), retry=Retry(max=3), timeout=500)
                 rqueue.q.enqueue(parse_resume, cv_paths)
                 update_session_status(id, "cvs_added")
                 return JSONResponse(content={"message": "Files saved", "cvs": insterted_cvs}, status_code=201)
