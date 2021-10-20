@@ -22,7 +22,7 @@ import rqueue
 from file_manager import save_file, save_cvs_zip
 from pydantic import BaseModel
 import add_to_store
-# import nltk
+import nltk
 from fastapi.responses import FileResponse
 import base64
 import statistics
@@ -30,7 +30,7 @@ from haystack.retriever import ElasticsearchRetriever
 from models import document_store
 retriever = ElasticsearchRetriever(document_store)
 
-# nltk.download('stopwords')
+nltk.download('stopwords')
 
 
 class UpdateFS(BaseModel):

@@ -1,4 +1,4 @@
-FROM python:3.6-stretch
+FROM python:3.7-stretch
 
 # We don't want to run our application as root if it is not strictly necessary, even in a container.
 # Create a user and a group called 'app' to run the processes.
@@ -16,6 +16,9 @@ RUN pip install -r requirements.txt
 
 RUN pip install -e git+git://github.com/cynor-eyHack2021/haystack.git#egg=farm-haystack
 
+RUN python -m spacy download en_core_web_lg
+
+RUN python -m spacy download en_core_web_sm
 # Hand everything over to the 'app' user
 RUN chown -R app:app /app
 

@@ -6,6 +6,7 @@ import spacy
 from spacy.matcher import Matcher
 from spacy.matcher import PhraseMatcher
 from spacy.tokens import Span
+import models
 
 
 # jdDataOcr ->  dictionary
