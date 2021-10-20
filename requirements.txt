@@ -1,8 +1,0 @@
-fastapi
-uvicorn
-pymongo
-python-multipart
-aiofiles
-docx2pdf
-pdf2image
-azure-cognitiveservices-vision-computervision

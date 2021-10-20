@@ -6,12 +6,12 @@ import spacy
 from spacy.matcher import Matcher
 from spacy.matcher import PhraseMatcher
 from spacy.tokens import Span
-import models
 
 
 # jdDataOcr ->  dictionary
 def get_location_and_company_name(texts):
-    nlp = spacy.load('en_core_web_lg')
+    # nlp = spacy.load('en_core_web_lg')
+    nlp = models.location_and_company_name_model
     docs = nlp.pipe(texts)
 
     info_dict = {
@@ -68,7 +68,8 @@ def get_designation(texts):
             "weight": 1,
         },
     }
-    nlp = spacy.load('en_core_web_sm')
+    # nlp = spacy.load('en_core_web_sm')
+    nlp = models.designation_model
     matcher = PhraseMatcher(nlp.vocab, attr="LOWER")
 
     with open('data/job-titles.txt') as f:
@@ -96,7 +97,8 @@ def get_designation(texts):
 
 
 def get_requirements(texts):
-    nlp = spacy.load('en_core_web_sm')
+    # nlp = spacy.load('en_core_web_sm')
+    nlp = models.requirements_model
     matcher = Matcher(nlp.vocab)
 
     # keyword extraction

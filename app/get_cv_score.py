@@ -2,16 +2,16 @@ from haystack.document_store import ElasticsearchDocumentStore
 from haystack.ranker import SentenceTransformersRanker
 import pprint
 from cvinfo import update_cv_feature_store
-
-document_store = ElasticsearchDocumentStore(
-    host="157.245.110.225", username="", password="", index="document")
-ranker = SentenceTransformersRanker(
-    model_name_or_path="cross-encoder/ms-marco-MiniLM-L-12-v2")
+import models 
+# document_store = ElasticsearchDocumentStore(
+#     host="157.245.110.225", username="", password="", index="document")
+# ranker = SentenceTransformersRanker(
+#     model_name_or_path="cross-encoder/ms-marco-MiniLM-L-12-v2")
 
 
 def get_docs_by_cv_id(id):
     print("Getting documents for CV ID: " + str(id))
-    docs = document_store.get_all_documents(filters={"name": [id]})
+    docs = models.document_store.get_all_documents(filters={"name": [id]})
     print(docs)
     return docs
 
@@ -30,7 +30,7 @@ def get_cv_score(feature_store, id):
                     continue
                 keyword = ' '.join([kw[0] for kw in req["text"]]) #TODO
                 weight = req["weight"]
-                result = ranker.predict(query=keyword, documents=documents, top_k=1)
+                result = models.ranker.predict(query=keyword, documents=documents, top_k=1)
                 if result[0][0].item() > 0:
                     weighted_score = weight*round(result[0][0].item(), 2)
                     cvInfo[key][key2].update({"sim_score": result[0][0].item(), "matched": result[0][1].text, "weighted_score": weighted_score})
@@ -45,7 +45,7 @@ def get_cv_score(feature_store, id):
                 if req["text"] == None:
                     continue
                 weight = req["weight"]
-                result = ranker.predict(query=keyword, documents=documents, top_k=1)
+                result = models.ranker.predict(query=keyword, documents=documents, top_k=1)
                 if result[0][0].item() > 0:
                     weighted_score = weight*round(result[0][0].item(), 2)
                     cvInfo[key][key2].update({"sim_score": result[0][0].item(), "matched": result[0][1].text, "weighted_score": weighted_score})
@@ -57,7 +57,7 @@ def get_cv_score(feature_store, id):
             if keyword == None:
                     continue
             weight = value["weight"]
-            result = ranker.predict(
+            result = models.ranker.predict(
                 query=keyword, documents=documents, top_k=1)
             if result[0][0].item() > 0:
                 weighted_score = weight*round(result[0][0].item(), 2)
