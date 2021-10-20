@@ -1,3 +1,5 @@
+import nltk
+nltk.download('stopwords')
 from haystack.document_store.elasticsearch import ElasticsearchDocumentStore
 from rq.job import Retry
 import db
@@ -22,15 +24,16 @@ import rqueue
 from file_manager import save_file, save_cvs_zip
 from pydantic import BaseModel
 import add_to_store
-import nltk
 from fastapi.responses import FileResponse
 import base64
 import statistics
 from haystack.retriever import ElasticsearchRetriever
-from models import document_store
-retriever = ElasticsearchRetriever(document_store)
+from haystack.document_store import ElasticsearchDocumentStore
 
-nltk.download('stopwords')
+document_store = ElasticsearchDocumentStore(
+    host="157.245.110.225", username="", password="", index="document")
+
+retriever = ElasticsearchRetriever(document_store)
 
 
 class UpdateFS(BaseModel):

@@ -135,3 +135,4 @@ typer==0.4.0
 typing-extensions==3.10.0.2
 urllib3==1.26.7
 uvicorn==0.15.0
+rq-dashboard==0.5.1
